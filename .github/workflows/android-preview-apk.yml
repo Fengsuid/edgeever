@@ -1,0 +1,29 @@
+name: Android plugin preview APK
+
+on:
+  push:
+    branches:
+      - android-preview-apk
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK packages
+        run: |
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager "platforms;android-34" "build-tools;34.0.0" >/dev/null
+      - name: Build preview APK
+        run: bash android-preview/build-apk.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: edgeever-plugin-preview-apk
+          path: android-preview/build/edgeever-plugin-preview.apk
+          if-no-files-found: error
